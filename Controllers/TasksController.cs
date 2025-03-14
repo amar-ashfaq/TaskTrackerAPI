@@ -4,7 +4,9 @@ using TaskTrackerAPI.Models;
 
 namespace TaskTrackerAPI.Controllers
 {
-    public class TasksController : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class TasksController : ControllerBase
     {
         private readonly TaskTrackerDbContext _taskTrackerDbContext;
         public TasksController(TaskTrackerDbContext taskTrackerDbContext)
@@ -12,7 +14,7 @@ namespace TaskTrackerAPI.Controllers
             _taskTrackerDbContext = taskTrackerDbContext;
         }
 
-        // GET
+        // GET ALL
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TaskItem>>> GetTaskItems()
         {
@@ -50,6 +52,45 @@ namespace TaskTrackerAPI.Controllers
             await _taskTrackerDbContext.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetTaskItem), new { id = taskItem.Id }, taskItem);
+        }
+
+        // UPDATE
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<ActionResult> Update(int id, [FromBody] TaskItem updatedTask)
+        {
+            var taskItem = await _taskTrackerDbContext.Tasks.FindAsync(id);
+
+            if (taskItem == null)
+            {
+                return NotFound();
+            }
+
+            taskItem.Title = updatedTask.Title;
+            taskItem.Description = updatedTask.Description;
+            taskItem.IsCompleted = updatedTask.IsCompleted;
+
+            await _taskTrackerDbContext.SaveChangesAsync();
+
+            return Ok(taskItem);
+        }
+
+        // DELETE
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var taskItem = await _taskTrackerDbContext.Tasks.FindAsync(id);
+
+            if (taskItem == null)
+            {
+                return NotFound();
+            }
+
+            _taskTrackerDbContext.Tasks.Remove(taskItem);
+            await _taskTrackerDbContext.SaveChangesAsync(); 
+
+            return NoContent();
         }
 
     }

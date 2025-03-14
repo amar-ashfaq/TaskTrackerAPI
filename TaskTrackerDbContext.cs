@@ -3,10 +3,8 @@ using TaskTrackerAPI.Models;
 
 namespace TaskTrackerAPI
 {
-    public class TaskTrackerDbContext : DbContext
+    public class TaskTrackerDbContext(DbContextOptions<TaskTrackerDbContext> options) : DbContext(options)
     {
-        public TaskTrackerDbContext(DbContextOptions<TaskTrackerDbContext> options) : base(options) { }
-
         public DbSet<TaskItem> Tasks { get; set; }
     }
 }
